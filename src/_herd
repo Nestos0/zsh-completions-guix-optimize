@@ -1,0 +1,86 @@
+#compdef herd
+
+# GNU Shepherd --- System service manager for GNU
+# Copyright © 2023 Oleg Pykhalov <go.wigust@gmail.com>
+#
+# This file is part of GNU Shepherd.
+#
+# GNU Shepherd is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or (at
+# your option) any later version.
+#
+# GNU Shepherd is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Shepherd.  If not, see <https://www.gnu.org/licenses/>.
+
+# Zsh completion for Shepherd commands.
+
+_herd_complete_subcommand() {
+    local command="$words[2]"
+    case "$command" in
+        discover)
+            _values 'discover options' 'guix-daemon'
+            ;;
+        schedule)
+            _values 'schedule options' 'mcron' 'timer'
+            ;;
+        set-http-proxy)
+            _values 'set-http-proxy options' 'guix-daemon'
+            ;;
+        *)
+            local -a services
+            services=(${(f)"$(herd status 2>/dev/null | grep '^ +\|^ -\| \*' | cut -d ' ' -f3)"})
+            _values 'services' $services
+            ;;
+    esac
+}
+
+_herd_complete_3() {
+    local command="$words[3]"
+    case "$command" in
+        guix-daemon)
+            _values 'options' 'on' 'off'
+            ;;
+        *)
+            ;;
+    esac
+}
+
+_herd() {
+    local -a _herd_subcommands_list
+    _herd_subcommands_list=(
+        'configuration:Show configuration'
+        'disable:Disable a service'
+        'discover:Discover services'
+        'doc:Show documentation'
+        'enable:Enable a service'
+        'help:Show help'
+        'restart:Restart a service'
+        'schedule:Schedule tasks'
+        'set-http-proxy:Set HTTP proxy'
+        'spawn:Spawn a service'
+        'start:Start a service'
+        'status:Show service status'
+        'stop:Stop a service'
+        'trigger:Trigger an action'
+    )
+
+    case $CURRENT in
+        2)
+            _describe 'herd commands' _herd_subcommands_list
+            ;;
+        3)
+            _herd_complete_subcommand
+            ;;
+        4)
+            _herd_complete_3
+            ;;
+    esac
+}
+
+_herd "$@"
